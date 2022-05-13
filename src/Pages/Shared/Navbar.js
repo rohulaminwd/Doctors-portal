@@ -1,14 +1,14 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
 
 const Navbar = () => {
     const menuItems = <>
-        <li><Link to='/' >Home</Link></li>
-        <li><Link to='/appointment' >Appointment</Link></li>
-        <li><Link to='/Review' >Review</Link></li>
-        <li><Link to='/Review' >Contact</Link></li>
-        <li><Link to='/About' >About</Link></li>
-        <li><Link to='/Login' >Login</Link></li>
+        <li className='mx-2'><NavLink to='/' >Home</NavLink></li>
+        <li className='mx-2'><NavLink to='/appointment' >Appointment</NavLink></li>
+        <li className='mx-2'><NavLink to='/Review' >Review</NavLink></li>
+        <li className='mx-2'><NavLink to='/Contact' >Contact</NavLink></li>
+        <li className='mx-2'><NavLink to='/About' >About</NavLink></li>
+        <li className='mx-2'><NavLink to='/Login' >Login</NavLink></li>
     </>
     return (
         <div class="navbar bg-base-100">

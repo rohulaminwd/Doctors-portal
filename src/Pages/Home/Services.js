@@ -28,7 +28,7 @@ const Services = () => {
         }
     ]
     return (
-        <div className='my-16 px-16'>
+        <div className='my-16 px-4 lg:px-16'>
             <div className="text-center">
                 <h4 className='text-primary font-bold'>OUR SERVICES</h4>
                 <h1 className='text-4xl'>Services We Provide</h1>
@@ -46,7 +46,7 @@ const Services = () => {
             </div>
             <div class="hero mb-20 py-10">
                 <div class="hero-content flex-col lg:flex-row">
-                    <img src={treatment} class="max-w-sm rounded-lg shadow-2xl" />
+                    <img src={treatment} class="lg:max-w-sm rounded-lg shadow-2xl" />
                     <div>
                         <h1 class="text-5xl font-bold">Exceptional Dental Care, on Your Terms</h1>
                         <p class="py-6">It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout. The point of using Lorem Ipsumis that it has a more-or-less normal distribution of letters,as opposed to using 'Content here, content here', making it look like readable English. Many desktop publishing packages and web page</p>
