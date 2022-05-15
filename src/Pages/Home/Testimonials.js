@@ -43,7 +43,7 @@ const Testimonials = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mt-24">
                 {
                     reviews.map(review => <ReviewCard
-                        key={review._d}
+                        key={review._di}
                         review={review}
                     ></ReviewCard>)
                 }
