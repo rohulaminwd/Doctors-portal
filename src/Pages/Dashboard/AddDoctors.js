@@ -1,49 +1,67 @@
-import { useCreateUserWithEmailAndPassword, useSignInWithGoogle, useUpdateProfile } from 'react-firebase-hooks/auth';
-import auth from '../../firebase.init'
-import { useForm } from "react-hook-form";
+import React from 'react';
+import { useForm } from 'react-hook-form';
+import { useQuery } from 'react-query';
+import { toast } from 'react-toastify';
 import Loading from '../Shared/Loading';
-import useToken from '../../Hooks/useToken';
-import { Link, useNavigate } from 'react-router-dom';
 
-const SignUp = () => {
-    const [signInWithGoogle, gUser, gLoading, gError] = useSignInWithGoogle(auth);
-    const [updateProfile, updating, updateeError] = useUpdateProfile(auth);
+const AddDoctors = () => {
     const { register, formState: { errors }, handleSubmit } = useForm();
-    const [
-        createUserWithEmailAndPassword,
-        user,
-        loading,
-        error,
-      ] = useCreateUserWithEmailAndPassword(auth);
 
-    const [token] = useToken(user || gUser);
-    const navigate = useNavigate  
-    let signInError;  
+    const {data: services, isLoading, refetch} = useQuery('services', () => fetch('http://localhost:5000/service').then(res => res.json()))
 
-    if(loading || gLoading || updating){
-        return <Loading></Loading>
-    }
-
-    if(error || gError || updateeError){
-        signInError = <p className='text-red-500 mb-2'><small>{error?.message || gError?.message || updateeError.message}</small></p>
-    }
-
-    if(token){
-        // navigate('/appointment')
-    }
+    const imageStorageKey = '290c7a0f169eabc5cf1f1fe286564c38'
 
     const onSubmit = async data => {
-        // console.log(data);
-        await createUserWithEmailAndPassword(data.email, data.password);
-        await updateProfile({ displayName: data.name});
-        console.log('update name done', data);
+        console.log('data', data);
+        const image = data.image[0];
+        const fromData = new FormData();
+        fromData.append('image', image);
+        const url = `https://api.imgbb.com/1/upload?key=${imageStorageKey}`
+        fetch(url, {
+            method: 'POST',
+            body: fromData
+        })
+        .then(res => res.json())
+        .then(result => {
+            if(result.success){
+                console.log('imgbb', result)
+                const img = result.data.url;
+                const doctor = {
+                    name: data.name,
+                    email: data.email,
+                    specialty: data.specialty,
+                    img: img
+                }
+                // send data backend
+                fetch('http://localhost:5000/doctor', {
+                    method: "POST",
+                    headers: {
+                        'content-type': 'application/json',
+                        'authorization': `Bearer ${localStorage.getItem('accessToken')}`
+                    },
+                    body: JSON.stringify(doctor)
+                })
+                .then(res => res.json())
+                .then(inserted => {
+                    if(inserted.insertedId){
+                        toast.success('Doctors successfully added');
+                        refetch()
+                    }else{
+                        toast.error('fail to add a doctor')
+                    }
+                })
+            }
+        })
     }
 
+    if(isLoading){
+        return <Loading />;
+    }
     return (
-        <div className='flex items-center justify-center h-screen'>
+        <div className='flex justify-center items-center lg:mt-24'>
             <div className="card w-80 lg:w-96 bg-base-100 shadow-md">
                 <div className="card-body text-center">
-                    <h2 className="text-2xl font-bold text-center">Sign Up</h2>
+                    <h2 className="text-2xl font-bold text-center">Add a doctors</h2>
                     <form onSubmit={handleSubmit(onSubmit)}>
                         <div className="form-control w-full max-w-xs">
                             <label className="label">
@@ -95,38 +113,41 @@ const SignUp = () => {
                         </div>
                         <div className="form-control w-full max-w-xs">
                             <label className="label">
-                                <span className="label-text">Password</span>
+                                <span className="label-text">Specialty</span>
+                            </label>
+                            <select {...register("specialty")} class="select select-bordered mb-5 w-full max-w-xs">
+                                {
+                                    services.map(service => <option
+                                    key={service._id}
+                                    value={service.name}
+                                    >{service.name}</option>)
+                                }
+                            </select>
+                        </div>
+                        <div className="form-control w-full max-w-xs">
+                            <label className="label">
+                                <span className="label-text">Photo</span>
                             </label>
                             <input 
-                                type="password" 
-                                placeholder="Your Password" 
+                                type="file" 
                                 className="input input-bordered w-full max-w-xs" 
-                                {...register("password", {
+                                {...register("image", {
                                     required: {
                                     value: true,
-                                    message: 'Password is required'  
-                                    },
-                                    minLength: {
-                                    value: 6,
-                                    message: 'Must be 6 characters longer'
+                                    message: 'Image is required'  
                                     }
                                 })}
                             />
                             <label className="label">
-                            {errors.password?.type === 'required' && <span className="label-text-alt text-red-500">{errors.password.message}</span>}
-                            {errors.password?.type === 'minLength' && <span className="label-text-alt text-red-500">{errors.password.message}</span>}
+                            {errors.image?.type === 'required' && <span className="label-text-alt text-red-500">{errors.image.message}</span>}
                             </label>
                         </div>
-                        {signInError}
-                        <input className='btn w-full uppercase font-bold max-w-xs' type="submit" value="Sign Up"  />
+                        <input className='btn w-full uppercase font-bold max-w-xs' type="submit" value="Add"  />
                     </form>
-                    <p><small className='font-bold'>Already have an Account? <Link to='/login' className='text-secondary'>Please Login</Link></small></p>
-                    <div className="divider">OR</div>
-                    <button onClick={() => signInWithGoogle()} className="btn btn-dark btn-outline w-full max-w-xs">Sign in With Google</button>
                 </div>
             </div>
         </div>
     );
 };
 
-export default SignUp;
+export default AddDoctors;
